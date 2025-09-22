@@ -4,9 +4,9 @@ from pydantic import BaseModel
 import pickle
 import json
 
-
 app = FastAPI()
 
+# Allow all origins (for testing or frontend use)
 origins = ["*"]
 
 app.add_middleware(
@@ -17,44 +17,42 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-class model_input(BaseModel):
-    
-    Pregnancies : int
-    Glucose : int
-    BloodPressure : int
-    SkinThickness : int
-    Insulin : int
-    BMI : float
-    DiabetesPedigreeFunction :  float
-    Age : int
-    
+# Input schema
+class ModelInput(BaseModel):
+    Pregnancies: int
+    Glucose: int
+    BloodPressure: int
+    SkinThickness: int
+    Insulin: int
+    BMI: float
+    DiabetesPedigreeFunction: float
+    Age: int
 
-# loading the saved model
-diabetes_model = pickle.load(open('diabetes_model.sav','rb'))
+# Load the saved model
+diabetes_model = pickle.load(open("diabetes_model.sav", "rb"))
 
+# Root route (fixes 404 when visiting the base URL)
+@app.get("/")
+def root():
+    return {"message": "Welcome to the Diabetes Prediction API"}
 
-@app.post('/diabetes_prediction')
-def diabetes_pred(input_parameters : model_input):
-    
-    input_data = input_parameters.json()
-    input_dictionary = json.loads(input_data)
-    
-    preg = input_dictionary['Pregnancies']
-    glu = input_dictionary['Glucose']
-    bp = input_dictionary['BloodPressure']
-    skin = input_dictionary['SkinThickness']
-    insulin = input_dictionary['Insulin']
-    bmi = input_dictionary['BMI']
-    dpf = input_dictionary['DiabetesPedigreeFunction']
-    age = input_dictionary['Age']
+# Prediction route
+@app.post("/diabetes_prediction")
+def diabetes_pred(input_parameters: ModelInput):
+    input_dict = input_parameters.dict()
 
+    input_list = [
+        input_dict["Pregnancies"],
+        input_dict["Glucose"],
+        input_dict["BloodPressure"],
+        input_dict["SkinThickness"],
+        input_dict["Insulin"],
+        input_dict["BMI"],
+        input_dict["DiabetesPedigreeFunction"],
+        input_dict["Age"],
+    ]
 
-    input_list = [preg, glu, bp, skin, insulin, bmi, dpf, age]
-    
     prediction = diabetes_model.predict([input_list])
-    
-    if prediction[0] == 0:
-        return 'The person is not Diabetic'
-    
-    else:
-        return 'The person is Diabetic'
+
+    result = "The person is Diabetic" if prediction[0] == 1 else "The person is not Diabetic"
+    return {"prediction": result}
