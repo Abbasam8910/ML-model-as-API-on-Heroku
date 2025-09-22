@@ -244,7 +244,7 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ## 📞 Contact
 
-**Abbas Ahmad**
+**Abbas A M**
 
 - GitHub: [@Abbasam8910](https://github.com/Abbasam8910)
 - Repository: [ML-model-as-API-on-Heroku](https://github.com/Abbasam8910/ML-model-as-API-on-Heroku)
